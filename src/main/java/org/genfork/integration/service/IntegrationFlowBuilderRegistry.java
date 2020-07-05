@@ -55,7 +55,7 @@ public class IntegrationFlowBuilderRegistry {
 	private final JdbcRegistry jdbcRegistry = new JdbcRegistry();
 
 	@SuppressWarnings("rawtypes")
-	public static GenericTransformer<Message, Object> getMessageObjectGenericTransformer(Script script, Map<String, Object> scriptVariables) {
+	private GenericTransformer<Message, Object> getMessageObjectGenericTransformer(Script script, Map<String, Object> scriptVariables) {
 		return o -> {
 			script.getBinding().setVariable("message", o);
 			script.getBinding().setVariable("payload", o.getPayload());
@@ -73,7 +73,7 @@ public class IntegrationFlowBuilderRegistry {
 		};
 	}
 
-	private static GenericHandler<?> getObjectGenericHandler(Script script, Map<String, Object> scriptVariables) {
+	private GenericHandler<?> getObjectGenericHandler(Script script, Map<String, Object> scriptVariables) {
 		return (payload, headers) -> {
 			script.getBinding().setVariable("payload", payload);
 			script.getBinding().setVariable("headers", headers);

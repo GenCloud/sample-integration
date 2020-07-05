@@ -1,0 +1,93 @@
+{
+  "flowName": "Rest Postgres stream",
+  "components": [
+    {
+      "componentName": "bean",
+      "componentType": "other",
+      "componentParameters": {
+        "id": "pgDataSource",
+        "bean-type": "com.zaxxer.hikari.HikariDataSource",
+        "property-args": [
+          {
+            "property-name": "username",
+            "property-value": "postgres"
+          },
+          {
+            "property-name": "password",
+            "property-value": "58742"
+          },
+          {
+            "property-name": "jdbcUrl",
+            "property-value": "jdbc:postgresql://localhost:5432/test"
+          },
+          {
+            "property-name": "driverClassName",
+            "property-value": "org.postgresql.Driver"
+          }
+        ]
+      }
+    },
+    {
+      "componentName": "message-channel",
+      "componentType": "source",
+      "componentParameters": {
+        "id": "jdbcReqChannel",
+        "order": 1,
+        "channel-type": "direct",
+        "max-subscribers": 1000
+      }
+    },
+    {
+      "componentName": "message-channel",
+      "componentType": "source",
+      "componentParameters": {
+        "id": "jdbcRepChannel",
+        "order": 1,
+        "channel-type": "direct"
+      }
+    },
+    {
+      "componentName": "http-inbound-gateway",
+      "componentType": "source",
+      "componentParameters": {
+        "order": 2,
+        "http-inbound-supported-methods": [
+          "POST"
+        ],
+        "payload-type": "org.genfork.integration.model.request.http.SimpleJdbcPayload",
+        "log-stages": true,
+        "log-level": "INFO",
+        "request-channel": "jdbcReqChannel",
+        "reply-channel": "jdbcRepChannel"
+      }
+    },
+    {
+      "componentName": "handler",
+      "componentType": "processor",
+      "componentParameters": {
+        "order": 3,
+        "handler-definition": {
+          "componentName": "jdbc-outbound-adapter",
+          "componentType": "app",
+          "componentParameters": {
+            "data-source": "pgDataSource",
+            "query": "SELECT accountname, password, email, last_ip, banned, premium_points, premium_type FROM account_data d INNER JOIN account_info i ON d.id = i.id WHERE d.id = :payload.accountId",
+            "update-query": "UPDATE account_info SET banned = true WHERE id = :payload.accountId",
+            "jdbc-reply-channel": "jdbcRepChannel",
+            "log-stages": true,
+            "log-level": "INFO"
+          }
+        }
+      }
+    },
+    {
+      "componentName": "result",
+      "componentType": "app",
+      "componentParameters": {
+        "order": 4,
+        "cancel": false,
+        "result-channel": "jdbcRepChannel"
+      }
+    }
+  ]
+}
