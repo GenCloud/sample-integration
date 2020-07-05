@@ -1,0 +1,12 @@
+server:
+  port: 8000
+  servlet:
+    context-path: /integration
+
+monitoring:
+  injectction:
+    default: true
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
